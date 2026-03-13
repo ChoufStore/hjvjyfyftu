@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>hjvjyfyftu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .navbar {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .cart-link {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            position: relative;
+        }
+        .cart-count {
+            background: #ff4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+        }
+        .cart-total {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        .product {
+            background: white;
+            color: #333;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .product:hover {
+            transform: translateY(-5px);
+        }
+        .product-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .product-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .product-price {
+            font-size: 1.5rem;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            cursor: pointer;
+            width: 100%;
+        }
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo" onclick="window.location.href='index.html'">🛍️ hjvjyfyftu</div>
+        <a href="cart.html" class="cart-link">
+            🛒
+            <span class="cart-count" id="cart-count">0</span>
+            <span class="cart-total" id="cart-total">0 MAD</span>
+        </a>
+    </div>
+    
+    <div class="hero">
+        <h1>🇲🇦 Welcome to hjvjyfyftu</h1>
+        <p>Discover authentic Moroccan products</p>
+    </div>
+    
+    <div class="container">
+        <div class="products" id="products">
+            <p>Loading products...</p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>© 2026 hjvjyfyftu</p>
+    </div>
+
+    <script>
+        function updateCartDisplay() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('cart-count').textContent = count;
+            document.getElementById('cart-total').textContent = total + ' MAD';
+        }
+        
+        function viewProduct(name, price) {
+            alert('View product: ' + name);
+        }
+        
+        fetch('https://firestore.googleapis.com/v1/projects/choufstore-1a66b/databases/(default)/documents/stores/hjvjyfyftu/products')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('products');
+                if (data.documents && data.documents.length > 0) {
+                    let html = '';
+                    data.documents.forEach(doc => {
+                        const fields = doc.fields || {};
+                        const name = fields.name?.stringValue || 'Product';
+                        const price = fields.price?.integerValue || '0';
+                        const icon = fields.icon?.stringValue || '🛍️';
+                        
+                        html += `
+                            <div class="product" onclick="viewProduct('${name}', ${price})">
+                                <div class="product-icon">${icon}</div>
+                                <div class="product-name">${name}</div>
+                                <div class="product-price">${price} MAD</div>
+                                <button class="btn">View Details</button>
+                            </div>
+                        `;
+                    });
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p>No products yet</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('products').innerHTML = '<p>Error loading products</p>';
+            });
+            
+        updateCartDisplay();
+    </script>
+</body>
+</html>
